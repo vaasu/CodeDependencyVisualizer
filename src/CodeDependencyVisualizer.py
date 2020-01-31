@@ -9,6 +9,7 @@ import fnmatch
 
 from DotGenerator import *
 
+clang.cindex.Config.set_library_path('/usr/lib/llvm-6.0/lib')
 index = clang.cindex.Index.create()
 dotGenerator = DotGenerator()
 
@@ -135,6 +136,29 @@ def parseTranslationUnit(filePath, includeDirs, inclusionConfig):
 
 
 if __name__ == "__main__":
+    # from argparse import ArgumentParser, FileType
+    # from clang import cindex
+
+    compilation_database_path = "/home/arccore_employee/amsr-checkout/BSW/amsr-vector-fs-dm-diagnosticmanager/"
+
+    # Step 1: load the compilation database
+    compdb = clang.cindex.CompilationDatabase.fromDirectory(compilation_database_path)
+    source_file_path = "/home/arccore_employee/amsr-checkout/BSW/amsr-vector-fs-dm-diagnosticmanager/test/unit/gtest/amsr/diag/server/fault_manager/debouncing/counter_based_debouncing.cpp"
+
+    # Step 2: query compilation flags
+    try:
+        file_args = compdb.getCompileCommands(source_file_path)
+        arglist = list(file_args[0].arguments)
+        print(arglist[2:])
+        translation_unit = index.parse(source_file_path, arglist[1:])
+    except clang.cindex.TranslationUnitLoadError:
+        print("error")
+        pass
+
+    # file_nodes = get_nodes_in_file(translation_unit.cursor, source_file_path)
+    # print ([p.spelling for p in file_nodes])
+
+if False:
     parser = argparse.ArgumentParser(description="CodeDependencyVisualizer (CDV)")
     parser.add_argument('-d', required=True, help="directory with source files to parse (searches recusively)")
     parser.add_argument('-o', '--outFile', default='uml.dot', help="output file name / name of generated dot file")
